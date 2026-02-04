@@ -1,1 +1,3 @@
-# Informes-Practicas-Iniciales---202403155
+# Informes Practicas Iniciales
+# Kristel Amarilis Méndez Marroquin
+# 202403155
