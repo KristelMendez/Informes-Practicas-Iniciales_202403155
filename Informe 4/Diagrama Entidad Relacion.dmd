@@ -1,0 +1,8 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<OSDM_Design class="oracle.dbtools.crest.model.design.Design" name="Diagrama Entidad Relacion" id="75FD9822-05F5-6930-70F7-31F6896F23CA" version="3.5">
+<createdBy>USUARIO</createdBy>
+<createdTime>2026-03-12 02:37:00 UTC</createdTime>
+<ownerDesignName>Diagrama Entidad Relacion</ownerDesignName>
+<capitalNames>false</capitalNames>
+<designId>75FD9822-05F5-6930-70F7-31F6896F23CA</designId>
+</OSDM_Design>
