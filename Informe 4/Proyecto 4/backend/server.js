@@ -105,6 +105,119 @@ app.get("/api/catedraticos", (req, res) => {
     });
 });
 
+// CREAR PUBLICACIÓN
+app.post("/api/publicaciones", (req, res) => {
+    const { id_usuario, id_curso, id_catedratico, mensaje } = req.body;
+
+    const sql = `
+        INSERT INTO Publicacion (id_usuario, id_curso, id_catedratico, mensaje)
+        VALUES (?, ?, ?, ?)
+    `;
+
+    db.query(sql, [id_usuario, id_curso, id_catedratico, mensaje], (err, result) => {
+        if (err) return res.status(500).json(err);
+
+        res.json({ mensaje: "Publicación creada" });
+    });
+});
+
+// VER PUBLICACIONES
+app.get("/api/publicaciones", (req, res) => {
+    const sql = `
+        SELECT p.*, u.nombres, u.apellidos
+        FROM Publicacion p
+        JOIN Usuario u ON p.id_usuario = u.id_usuario
+        ORDER BY p.fecha DESC
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) return res.status(500).json(err);
+
+        res.json(results);
+    });
+});
+
+// CREAR COMENTARIO
+app.post("/api/comentarios", (req, res) => {
+    const { id_publicacion, id_usuario, mensaje } = req.body;
+
+    const sql = `
+        INSERT INTO Comentario (id_publicacion, id_usuario, mensaje)
+        VALUES (?, ?, ?)
+    `;
+
+    db.query(sql, [id_publicacion, id_usuario, mensaje], (err, result) => {
+        if (err) return res.status(500).json(err);
+
+        res.json({ mensaje: "Comentario agregado" });
+    });
+});
+
+// VER COMENTARIOS
+app.get("/api/comentarios/:id", (req, res) => {
+    const id = req.params.id;
+
+    const sql = `
+        SELECT c.*, u.nombres
+        FROM Comentario c
+        JOIN Usuario u ON c.id_usuario = u.id_usuario
+        WHERE c.id_publicacion = ?
+    `;
+
+    db.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json(err);
+
+        res.json(results);
+    });
+});
+
+// OBTENER USUARIO POR ID
+app.get("/api/usuario/:id", (req, res) => {
+    const id = req.params.id;
+
+    const sql = "SELECT * FROM Usuario WHERE id_usuario = ?";
+
+    db.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json(err);
+
+        res.json(results[0]);
+    });
+});
+
+// AGREGAR CURSO APROBADO
+app.post("/api/cursos-aprobados", (req, res) => {
+    const { id_usuario, id_curso } = req.body;
+
+    const sql = `
+        INSERT INTO Curso_Aprobado (id_usuario, id_curso, fecha_aprobacion)
+        VALUES (?, ?, NOW())
+    `;
+
+    db.query(sql, [id_usuario, id_curso], (err, result) => {
+        if (err) return res.status(500).json(err);
+
+        res.json({ mensaje: "Curso agregado" });
+    });
+});
+
+// VER CURSOS APROBADOS
+app.get("/api/cursos-aprobados/:id", (req, res) => {
+    const id = req.params.id;
+
+    const sql = `
+        SELECT c.nombre_curso, c.creditos
+        FROM Curso_Aprobado ca
+        JOIN Curso c ON ca.id_curso = c.id_curso
+        WHERE ca.id_usuario = ?
+    `;
+
+    db.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json(err);
+
+        res.json(results);
+    });
+});
+
 // INICIAR SERVIDOR
 app.listen(3001, () => {
     console.log("Servidor en http://localhost:3001");
