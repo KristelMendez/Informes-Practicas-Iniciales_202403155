@@ -2,24 +2,25 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 
+// Home es la página principal que se muestra después de iniciar sesión
 function Home() {
-  const [publicaciones, setPublicaciones] = useState([]);
-  const [comentarios, setComentarios] = useState({});
-  const [nuevoComentario, setNuevoComentario] = useState("");
-  const [busqueda, setBusqueda] = useState("");
+  const [publicaciones, setPublicaciones] = useState([]); // Lista de publicaciones que se muestran en el home
+  const [comentarios, setComentarios] = useState({}); // Comentarios de cada publicación, guardados en un objeto donde la clave es el ID de la publicación
+  const [nuevoComentario, setNuevoComentario] = useState(""); // El mensaje del nuevo comentario que el usuario quiere agregar
+  const [filtro, setFiltro] = useState("todos"); // El filtro para mostrar publicaciones
 
+  // Al cargar la página, obtenemos la lista de publicaciones para mostrar en el home
   useEffect(() => {
     obtenerPublicaciones();
   }, []);
 
+  // Función para obtener la lista de publicaciones desde el backend
   const obtenerPublicaciones = async () => {
     try {
       const token = localStorage.getItem("token");
 
       const res = await axios.get("http://localhost:3001/api/publicaciones", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       setPublicaciones(res.data);
@@ -29,15 +30,13 @@ function Home() {
     }
   };
 
+  // Función para cargar los comentarios de una publicación específica
   const cargarComentarios = async (id) => {
     const res = await axios.get(`http://localhost:3001/api/comentarios/${id}`);
-
-    setComentarios({
-      ...comentarios,
-      [id]: res.data,
-    });
+    setComentarios({ ...comentarios, [id]: res.data });
   };
 
+  // Función para crear un nuevo comentario
   const crearComentario = async (id_publicacion) => {
     try {
       const token = localStorage.getItem("token");
@@ -49,9 +48,7 @@ function Home() {
         mensaje: nuevoComentario,
       });
 
-      alert("Comentario agregado");
       setNuevoComentario("");
-
       cargarComentarios(id_publicacion);
 
     } catch (err) {
@@ -60,21 +57,25 @@ function Home() {
     }
   };
 
+  // Mostrar en pantalla la página con el formulario para crear una publicación
   return (
     <div style={{ padding: "20px" }}>
       <Navbar />
       <h2>Publicaciones</h2>
 
-      {/* BUSCADOR */}
-      <input
-        placeholder="Buscar publicaciones..."
-        onChange={(e) => setBusqueda(e.target.value)}
-      />
+      {/* FILTRO */}
+      <select onChange={(e) => setFiltro(e.target.value)}>
+        <option value="todos">Todas</option>
+        <option value="curso">Cursos</option>
+        <option value="catedratico">Catedráticos</option>
+      </select>
 
       {publicaciones
-        .filter((p) =>
-          p.mensaje.toLowerCase().includes(busqueda.toLowerCase())
-        )
+        .filter((p) => {
+          if (filtro === "todos") return true;
+          if (filtro === "curso") return p.id_curso !== null;
+          if (filtro === "catedratico") return p.id_catedratico !== null;
+        })
         .map((p) => (
           <div key={p.id_publicacion} style={{
             backgroundColor: "white",
@@ -85,10 +86,18 @@ function Home() {
           }}>
 
             <p><strong>{p.nombres} {p.apellidos}</strong></p>
-            <p>{p.mensaje}</p>
-            <p style={{ fontSize: "12px", color: "gray" }}>
-              {new Date(p.fecha).toLocaleString()}
+
+            {/* TIPO */}
+            <p style={{ color: "blue" }}>
+              {p.id_curso ? "Curso" : "Catedrático"}
             </p>
+
+            {/* NOMBRE */}
+            <p>
+              {p.nombre_curso || `${p.nombre_catedratico || ""}`}
+            </p>
+
+            <p>{p.mensaje}</p>
 
             <button onClick={() => cargarComentarios(p.id_publicacion)}>
               Ver comentarios
@@ -103,7 +112,7 @@ function Home() {
             </ul>
 
             <input
-              placeholder="Escribe un comentario"
+              placeholder="Comentario"
               value={nuevoComentario}
               onChange={(e) => setNuevoComentario(e.target.value)}
             />
