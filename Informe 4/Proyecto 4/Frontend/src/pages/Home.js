@@ -30,6 +30,12 @@ function Home() {
     }
   };
 
+  // Función para formatear fecha de creación
+  const formatearFecha = (fecha) => {
+    if (!fecha) return "";
+    return new Date(fecha).toLocaleString();
+  };
+
   // Función para cargar los comentarios de una publicación específica
   const cargarComentarios = async (id) => {
     const res = await axios.get(`http://localhost:3001/api/comentarios/${id}`);
@@ -90,6 +96,10 @@ function Home() {
             {/* TIPO */}
             <p style={{ color: "blue" }}>
               {p.id_curso ? "Curso" : "Catedrático"}
+            </p>
+
+            <p style={{ color: "#666", fontSize: "12px" }}>
+              Creado: {formatearFecha(p.fecha)}
             </p>
 
             {/* NOMBRE */}
